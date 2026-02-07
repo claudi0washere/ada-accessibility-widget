@@ -47,15 +47,29 @@ ollama serve
 
 ---
 
-## How to Use Sonnet on Demand
+## How to Use Sonnet or Mistral on Demand
 
-When you need Sonnet for a complex task:
+### Default (Free tier friendly):
+Haiku handles everything automatically.
 
+### When you need more power:
+
+**For complex reasoning/security:**
 ```
-"Use sonnet for this: [architecture/security/reasoning task]"
+"Use sonnet for this: [architecture/security/complex task]"
 ```
 
-Otherwise, Haiku handles everything.
+**For Mistral Large 3 (different reasoning style):**
+```
+"Use mistral for this: [task]"
+```
+
+### Model Comparison
+| Model | Speed | Cost | Best For |
+|-------|-------|------|----------|
+| Haiku | Fast | $0.00025/1K | Default, routine tasks |
+| Sonnet | Medium | $0.003/1K | Complex reasoning, security |
+| Mistral | Medium | ~$0.002/1K | Alternative reasoning |
 
 ---
 
@@ -69,6 +83,14 @@ session_status
 # Is Haiku default?
 cat ~/.openclaw/openclaw.json | jq '.agents.defaults.model.primary'
 # Should show: anthropic/claude-haiku-4-5
+
+# Are all models configured?
+cat ~/.openclaw/openclaw.json | jq '.agents.defaults.models'
+# Should show: haiku, sonnet, mistral
+
+# Is Mistral API key set?
+echo $MISTRAL_API_KEY
+# Should show your API key (first time per session)
 
 # Is Ollama running? (if installed)
 ollama serve

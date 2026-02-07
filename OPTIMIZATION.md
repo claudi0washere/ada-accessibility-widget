@@ -20,14 +20,22 @@
 
 ### ✅ Part 2: Model Routing
 **STATUS:** COMPLETE  
-- Config updated: Haiku default, Sonnet aliased
+- Config updated: Haiku default, Sonnet + Mistral aliased
 - SOUL.md includes MODEL SELECTION RULE
-- Haiku handles routine tasks (~$0.00025 per 1K tokens vs $0.003 for Sonnet)
+- Haiku handles routine tasks (~$0.00025 per 1K tokens)
+- Sonnet available for complex reasoning ($0.003 per 1K tokens)
+- Mistral Large 3 available as alternative ($~0.002 per 1K tokens)
 
-**How to use Sonnet when needed:**
+**How to use specific models when needed:**
 ```
-[In a message to trigger Sonnet for specific tasks]
 "Use sonnet for this architecture decision"
+"Use mistral for this analysis"
+```
+
+**Set Mistral API key (one-time):**
+```bash
+export MISTRAL_API_KEY="XjXwQYKrQRkLEywThyWuiQ2npSumnSfM"
+# Or add to ~/.bashrc for permanent access
 ```
 
 **Cost Impact:** $50-70/month → $5-10/month on models
@@ -123,6 +131,14 @@ openclaw shell session_status
 
 ---
 
+## Available Models
+
+| Model | Provider | Cost | Use Case |
+|-------|----------|------|----------|
+| **Haiku** (default) | Anthropic | $0.00025/1K | Routine, fast tasks |
+| **Sonnet** | Anthropic | $0.003/1K | Complex reasoning, security |
+| **Mistral** | Mistral | ~$0.002/1K | Alternative reasoning |
+
 ## Quick Verification
 
 **1. Check your context size:**
@@ -138,7 +154,18 @@ openclaw shell
 # Should show: model=anthropic/claude-haiku-4-5
 ```
 
-**3. Check Ollama status (if installed):**
+**3. Check all models are configured:**
+```bash
+cat ~/.openclaw/openclaw.json | jq '.agents.defaults.models | keys'
+# Should show: ["anthropic/claude-haiku-4-5", "anthropic/claude-sonnet-4-5", "mistral/mistral-large-3"]
+```
+
+**4. Check Mistral API key is set (if using Mistral):**
+```bash
+echo $MISTRAL_API_KEY
+```
+
+**5. Check Ollama status (if installed):**
 ```bash
 ollama serve  # Should run without errors
 ```
