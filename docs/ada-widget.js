@@ -143,7 +143,8 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
       invert: !!st.invert,
       grayscale: !!st.grayscale,
       readableFont: !!st.readableFont,
-      reduceMotion: !!st.reduceMotion
+      reduceMotion: !!st.reduceMotion,
+      widgetHidden: !!st.widgetHidden
     };
   }
 
@@ -163,6 +164,10 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
     root.classList.toggle('ada-grayscale', st.grayscale);
     root.classList.toggle('ada-readable-font', st.readableFont);
     root.classList.toggle('ada-reduce-motion', st.reduceMotion);
+
+    // Hide widget button (modal can still be opened via keyboard shortcut)
+    var widgetRoot = document.getElementById('ada-widget-root');
+    if (widgetRoot) widgetRoot.style.display = st.widgetHidden ? 'none' : '';
 
     // Page zoom (best-effort). Prefer CSS zoom if available, fallback to transform.
     var z = st.zoom;
@@ -281,11 +286,19 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
         invert: false,
         grayscale: false,
         readableFont: false,
-        reduceMotion: false
+        reduceMotion: false,
+        widgetHidden: false
       };
       applyAndSync();
       renderContrastPills();
       syncPressed();
+    });
+
+    var hideBtn = el('button', { class: 'ada-reset', type: 'button' }, ['Hide widget']);
+    hideBtn.addEventListener('click', function(){
+      state.widgetHidden = true;
+      applyAndSync();
+      close();
     });
 
     var statementText =
@@ -312,14 +325,31 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
     var controls = el('div', { class: 'ada-controls' }, [fontControls, zoomControls, visualControls, spacingControls, toggles]);
 
     modal.appendChild(controls);
-    modal.appendChild(el('div', { class: 'ada-actions' }, [resetBtn]));
+    modal.appendChild(el('div', { class: 'ada-actions' }, [resetBtn, hideBtn]));
     modal.appendChild(statement);
 
     root.appendChild(btn);
 
+    // Provide a focusable way to bring the widget back if hidden.
+    // This is visually hidden but becomes visible on keyboard focus.
+    var unhide = el('button', {
+      type: 'button',
+      id: 'ada-widget-unhide',
+      'aria-label': 'Show accessibility widget',
+      style: 'position:fixed;left:10px;top:10px;z-index:2147483647;padding:10px 12px;border-radius:10px;border:1px solid rgba(17,24,39,.2);background:#fff;color:#111827;transform:translateY(-120%);transition:transform .2s;'
+    }, ['Show accessibility options']);
+    unhide.addEventListener('focus', function(){ unhide.style.transform='translateY(0)'; });
+    unhide.addEventListener('blur', function(){ unhide.style.transform='translateY(-120%)'; });
+    unhide.addEventListener('click', function(){
+      state.widgetHidden = false;
+      applyAndSync();
+      open();
+    });
+
     document.body.appendChild(backdrop);
     document.body.appendChild(modal);
     document.body.appendChild(root);
+    document.body.appendChild(unhide);
 
     renderContrastPills();
 
@@ -344,6 +374,17 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
 
     function onKeyDown(e) {
       if (e.key === 'Escape') { close(); return; }
+
+      // Global-ish shortcut (when modal open): Alt+Shift+A toggles widget visibility
+      if ((e.key === 'A' || e.key === 'a') && e.altKey && e.shiftKey) {
+        e.preventDefault();
+        state.widgetHidden = !state.widgetHidden;
+        applyAndSync();
+        if (state.widgetHidden) close();
+        else open();
+        return;
+      }
+
       if (e.key !== 'Tab') return;
       // rudimentary focus trap
       var focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -357,6 +398,17 @@ html.ada-reduce-motion *{ animation: none !important; transition: none !importan
 
     btn.addEventListener('click', function(){
       if (modal.hidden) open(); else close();
+    });
+
+    // Shortcut: Alt+Shift+A toggles widget (works even when button is hidden)
+    document.addEventListener('keydown', function(e){
+      if ((e.key === 'A' || e.key === 'a') && e.altKey && e.shiftKey) {
+        e.preventDefault();
+        state.widgetHidden = !state.widgetHidden;
+        applyAndSync();
+        if (state.widgetHidden) close();
+        else open();
+      }
     });
 
     backdrop.addEventListener('click', close);
