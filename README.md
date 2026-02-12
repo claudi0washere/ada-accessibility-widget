@@ -19,6 +19,7 @@ GitHub Pages demo (from `/docs`):
   - Readable font toggle
   - Reduce motion toggle
 - Includes an Accessibility Statement section in the modal
+- Hide widget option (with keyboard shortcut to bring it back)
 - Saves user settings in `localStorage`
 
 ## Inject into any site
