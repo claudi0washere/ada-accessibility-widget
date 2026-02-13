@@ -1,12 +1,4 @@
-# OpenClaw workspace
-memory/
-projects/
-.venv-*/
-__pycache__/
-*.pyc
+# macOS / Node
 .DS_Store
 node_modules/
 .env
-
-# Generated / misc demo pages
-weather.html
